@@ -1,0 +1,194 @@
+/* ===== RESET ===== */
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins', sans-serif;
+}
+
+body{
+    background:linear-gradient(135deg,#0f4c81,#1e88e5);
+    min-height:100vh;
+}
+
+/* ===== HEADER ===== */
+header{
+    background:white;
+    padding:15px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+header h2{
+    color:#0f4c81;
+    font-weight:600;
+}
+
+.login-btn{
+    background:#0f4c81;
+    color:white;
+    border:none;
+    padding:8px 18px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:14px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    transition:0.3s;
+}
+
+.login-btn:hover{
+    background:#09345a;
+}
+
+/* ===== CONTAINER ===== */
+.container{
+    background:white;
+    max-width:800px;
+    margin:40px auto;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.2);
+    animation:fadeIn 0.5s ease-in-out;
+}
+
+.container h3{
+    text-align:center;
+    margin-bottom:20px;
+    color:#0f4c81;
+}
+
+.hidden{
+    display:none;
+}
+
+/* ===== WAKTU ===== */
+#waktuBox{
+    text-align:center;
+    margin-bottom:20px;
+    color:#0f4c81;
+    font-weight:500;
+}
+
+/* ===== FORM ===== */
+.form-group{
+    margin-bottom:15px;
+}
+
+.form-group label{
+    font-size:14px;
+    font-weight:500;
+    display:block;
+    margin-bottom:5px;
+}
+
+input, textarea, select{
+    width:100%;
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:14px;
+    transition:0.3s;
+}
+
+input:focus, textarea:focus, select:focus{
+    border-color:#0f4c81;
+    outline:none;
+    box-shadow:0 0 5px rgba(15,76,129,0.4);
+}
+
+textarea{
+    resize:none;
+}
+
+/* ===== BUTTON ===== */
+.submit-btn{
+    width:100%;
+    padding:12px;
+    border:none;
+    background:#0f4c81;
+    color:white;
+    font-size:15px;
+    border-radius:8px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.submit-btn:hover{
+    background:#09345a;
+}
+
+.logout-btn{
+    background:#dc3545;
+    color:white;
+    border:none;
+    padding:8px 15px;
+    border-radius:8px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.logout-btn:hover{
+    background:#a71d2a;
+}
+
+/* ===== TABEL ===== */
+table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+}
+
+table th{
+    background:#0f4c81;
+    color:white;
+    padding:10px;
+}
+
+table td{
+    padding:8px;
+    border-bottom:1px solid #ddd;
+    text-align:center;
+}
+
+table tr:hover{
+    background:#f2f2f2;
+}
+
+/* ===== CANVAS ===== */
+canvas{
+    margin-top:20px;
+    background:white;
+    padding:15px;
+    border-radius:10px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* ===== ANIMASI ===== */
+@keyframes fadeIn{
+    from{opacity:0; transform:translateY(10px);}
+    to{opacity:1; transform:translateY(0);}
+}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:768px){
+
+    header{
+        flex-direction:column;
+        gap:10px;
+        text-align:center;
+    }
+
+    .container{
+        margin:20px;
+        padding:20px;
+    }
+
+    table{
+        font-size:12px;
+    }
+
+}
