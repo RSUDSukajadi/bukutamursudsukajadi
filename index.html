@@ -191,6 +191,11 @@ window.logout = function(){
     document.getElementById("loginPage").classList.remove("hidden");
 };
 
+window.backToForm = function(){
+    document.getElementById("loginPage").classList.add("hidden");
+    document.getElementById("formPage").classList.remove("hidden");
+};
+
 /* ================= SIMPAN DATA ================= */
 
 document.getElementById("guestForm").addEventListener("submit", async function(e){
