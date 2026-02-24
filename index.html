@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buku Tamu Digital - RSUD Sukajadi</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<header>
+    <h2><i class="fa-solid fa-hospital"></i> RSUD Sukajadi</h2>
+    <button class="login-btn" id="authBtn" onclick="handleAuth()">
+    <i class="fa-solid fa-right-to-bracket"></i> Login Admin
+</button>
+</header>
+
+<!-- FORM BUKU TAMU -->
+<div class="container" id="formPage">
+    <h3>Buku Tamu Digital</h3>
+
+<div id="waktuBox">
+    <div id="tanggalSekarang"></div>
+    <div id="jamSekarang" style="font-size:22px;font-weight:700;"></div>
+</div>
+
+    <form id="guestForm">
+        <div class="form-group">
+            <label>Nama</label>
+            <input type="text" id="nama" required>
+        </div>
+        <div class="form-group">
+            <label>Instansi</label>
+            <input type="text" id="instansi">
+        </div>
+        <div class="form-group">
+            <label>No HP</label>
+            <input type="tel" id="hp" required>
+        </div>
+        <div class="form-group">
+            <label>Keperluan</label>
+            <textarea id="keperluan" required></textarea>
+        </div>
+        <div class="form-group">
+            <label>Unit Tujuan</label>
+            <select id="unit" required>
+                <option value="">-- Pilih Unit --</option>
+                <option>IGD</option>
+                <option>Rawat Jalan</option>
+                <option>Rawat Inap</option>
+                <option>Administrasi</option>
+                <option>Direksi</option>
+		<option>Lainnya</option>
+            </select>
+        </div>
+        <button type="submit" class="submit-btn">Kirim</button>
+    </form>
+</div>
+
+<!-- LOGIN ADMIN -->
+<!-- LOGIN ADMIN -->
+<div class="container hidden" id="loginPage">
+    <h3>Login Admin</h3>
+
+    <form id="loginForm">
+
+    <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="adminUser" placeholder="Masukkan Username">
+    </div>
+
+    <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="adminPass" placeholder="Masukkan Password">
+    </div>
+
+        <button type="submit" class="submit-btn">Login</button>
+    </form>
+
+    <button class="logout-btn" style="margin-top:10px;background:gray;"
+        onclick="backToForm()">Kembali</button>
+</div>
+
+<div id="adminPage" class="hidden">
+
+<div class="dashboard-wrapper">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <h2>Admin Buku Tamu</h2>
+        <ul>
+    <li onclick="showDashboard()" class="active">
+        <i class="fa-solid fa-chart-line"></i> Dashboard
+    </li>
+    <li onclick="showData()">
+        <i class="fa-solid fa-table"></i> Data Kunjungan
+    </li>
+</ul>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="main-content">
+
+        <!-- DASHBOARD -->
+        <div id="dashboardContent">
+            <h2>Dashboard Admin</h2>
+
+            <div class="card-container">
+                <div class="card blue">
+                    <h4>Total Tamu</h4>
+                    <h2 id="totalTamu">0</h2>
+                </div>
+
+                <div class="card green">
+                    <h4>Tamu Hari Ini</h4>
+                    <h2 id="tamuHariIni">0</h2>
+                </div>
+            </div>
+
+            <div class="chart-box">
+                <canvas id="guestChart"></canvas>
+            </div>
+        </div>
+
+        <!-- DATA KUNJUNGAN -->
+       <div id="dataContent" class="hidden">
+    <h2>Data Kunjungan Tamu</h2>
+
+    <div class="filter-box">
+        <input type="text" id="searchInput" placeholder="Cari nama atau instansi...">
+        <input type="month" id="filterBulan">
+
+        <button onclick="exportToExcel()" class="submit-btn" style="width:auto;">
+            <i class="fa-solid fa-file-excel"></i> Export ke Excel
+        </button>
+    </div>
+
+    <div class="table-box">
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>Nama</th>
+                    <th>Instansi</th>
+                    <th>No HP</th>
+                    <th>Keperluan</th>
+                    <th>Unit</th>
+                    <th>Tanggal</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  getDocs,
+  deleteDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+/* ================= FIREBASE CONFIG ================= */
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDWm-Eg8fMr6nAeu0KXGn1uKHME5Q7BjtI",
+  authDomain: "bukutamu-rsudsukajadi.firebaseapp.com",
+  projectId: "bukutamu-rsudsukajadi",
+  storageBucket: "bukutamu-rsudsukajadi.firebasestorage.app",
+  messagingSenderId: "770254531991",
+  appId: "1:770254531991:web:e1f90f21e7af5dda1568d2"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* ================= JAM & TANGGAL ================= */
+
+function updateWaktu(){
+    const sekarang = new Date();
+
+    const opsiTanggal = { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    };
+
+    document.getElementById("tanggalSekarang").innerText =
+        sekarang.toLocaleDateString('id-ID', opsiTanggal);
+
+    document.getElementById("jamSekarang").innerText =
+        sekarang.toLocaleTimeString('id-ID');
+}
+
+updateWaktu();
+setInterval(updateWaktu, 1000);
+
+/* ================= LOGIN ================= */
+
+window.login = function(){
+    const user = document.getElementById("adminUser").value;
+    const pass = document.getElementById("adminPass").value;
+
+    if(user === "admin" && pass === "rsud123"){
+
+        localStorage.setItem("isLogin", "true");
+        location.reload();
+
+    } else {
+        alert("Username atau Password salah!");
+    }
+};
+
+document.getElementById("loginForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    login();
+});
+
+window.hapusData = async function(id){
+    if(confirm("Yakin ingin menghapus data ini?")){
+        await deleteDoc(doc(db, "tamu", id));
+        alert("Data berhasil dihapus");
+        loadData(); // reload tabel
+    }
+};
+
+window.logout = function(){
+    localStorage.removeItem("isLogin");
+
+    document.getElementById("adminPage").classList.add("hidden");
+    document.getElementById("loginPage").classList.remove("hidden");
+};
+
+window.showLogin = function(){
+    document.getElementById("formPage").classList.add("hidden");
+    document.getElementById("adminPage").classList.add("hidden");
+    document.getElementById("loginPage").classList.remove("hidden");
+};
+
+window.handleAuth = function(){
+
+    if(localStorage.getItem("isLogin") === "true"){
+        localStorage.removeItem("isLogin");
+        location.reload(); // lebih aman dan stabil
+    } else {
+        showLogin();
+    }
+};
+
+window.backToForm = function(){
+    document.getElementById("loginPage").classList.add("hidden");
+    document.getElementById("formPage").classList.remove("hidden");
+};
+
+window.exportToExcel = function(){
+
+    let table = document.querySelector("#dataTable");
+    let rows = table.querySelectorAll("tr");
+
+    let csv = [];
+
+    rows.forEach(row => {
+        let cols = row.querySelectorAll("th, td");
+        let rowData = [];
+
+        cols.forEach(col => {
+            rowData.push('"' + col.innerText.replace(/"/g, '""') + '"');
+        });
+
+        csv.push(rowData.join(","));
+    });
+
+    let csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
+
+    let downloadLink = document.createElement("a");
+    downloadLink.download = "data_kunjungan_tamu.xlsx";
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    downloadLink.style.display = "none";
+
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+};
+
+/* ================= SIMPAN DATA ================= */
+
+document.getElementById("guestForm").addEventListener("submit", async function(e){
+    e.preventDefault();
+
+    try {
+        await addDoc(collection(db, "tamu"), {
+            nama: nama.value,
+            instansi: instansi.value,
+            hp: hp.value,
+            keperluan: keperluan.value,
+            unit: unit.value,
+            tanggal: new Date()
+        });
+
+        alert("Data berhasil dikirim ke Firebase!");
+        this.reset();
+
+    } catch(error){
+        console.error(error);
+        alert("Gagal kirim data!");
+    }
+});
+
+/* ================= LOAD DATA & GRAFIK ================= */
+
+let chart;
+
+async function loadData(){
+    const snapshot = await getDocs(collection(db, "tamu"));
+
+    const table = document.getElementById("tableBody");
+    table.innerHTML = "";
+
+    const searchValue = document.getElementById("searchInput").value.trim().toLowerCase();
+    const filterBulan = document.getElementById("filterBulan").value;
+
+    let unitCount = {};
+    let total = 0;
+    let hariIni = 0;
+
+    const today = new Date().toDateString();
+
+    snapshot.forEach(d => {
+        const g = d.data();
+
+        // AMBIL TANGGAL DENGAN AMAN
+        let tanggalData;
+        if(g.tanggal.seconds){
+            tanggalData = new Date(g.tanggal.seconds * 1000);
+        } else {
+            tanggalData = new Date(g.tanggal);
+        }
+
+        // FORMAT BULAN (YYYY-MM)
+        const bulanData = tanggalData.getFullYear() + "-" +
+            String(tanggalData.getMonth()+1).padStart(2,"0");
+
+        // FILTER BULAN
+        if(filterBulan && bulanData !== filterBulan){
+            return;
+        }
+
+        // FILTER PENCARIAN
+        if(searchValue){
+            const nama = (g.nama || "").toLowerCase();
+            const instansi = (g.instansi || "").toLowerCase();
+
+            if(!nama.includes(searchValue) && !instansi.includes(searchValue)){
+                return;
+            }
+        }
+
+        total++;
+
+        // HITUNG HARI INI
+        if(tanggalData.toDateString() === today){
+            hariIni++;
+        }
+
+        // HITUNG UNIT
+        unitCount[g.unit] = (unitCount[g.unit] || 0) + 1;
+
+        table.innerHTML += `
+        <tr>
+            <td>${g.nama}</td>
+            <td>${g.instansi}</td>
+            <td>${g.hp}</td>
+            <td>${g.keperluan}</td>
+            <td>${g.unit}</td>
+            <td>${tanggalData.toLocaleString()}</td>
+            <td>
+                <button onclick="hapusData('${d.id}')" 
+                    style="background:red;color:white;border:none;padding:5px 8px;border-radius:5px;cursor:pointer;">
+                    Hapus
+                </button>
+            </td>
+        </tr>`;
+    });
+
+    document.getElementById("totalTamu").innerText = total;
+    document.getElementById("tamuHariIni").innerText = hariIni;
+
+    if(chart){
+        chart.destroy();
+    }
+
+    const ctx = document.getElementById("guestChart").getContext("2d");
+
+    chart = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: Object.keys(unitCount),
+            datasets: [{
+                label: "Jumlah Tamu per Unit",
+                data: Object.values(unitCount),
+                backgroundColor: "#0f4c81"
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+}
+
+document.getElementById("searchInput")
+    .addEventListener("input", loadData);
+
+document.getElementById("filterBulan")
+    .addEventListener("change", loadData);
+
+/* ================= CEK STATUS LOGIN SAAT REFRESH ================= */
+
+window.showDashboard = function(){
+    document.getElementById("dashboardContent").classList.remove("hidden");
+    document.getElementById("dataContent").classList.add("hidden");
+}
+
+window.showData = function(){
+    document.getElementById("dashboardContent").classList.add("hidden");
+    document.getElementById("dataContent").classList.remove("hidden");
+}
+
+window.addEventListener("load", function(){
+    if(localStorage.getItem("isLogin") === "true"){
+
+        document.getElementById("formPage").classList.add("hidden");
+        document.getElementById("loginPage").classList.add("hidden");
+        document.getElementById("adminPage").classList.remove("hidden");
+
+        document.getElementById("authBtn").innerHTML =
+        '<i class="fa-solid fa-right-from-bracket"></i> Logout';
+
+        loadData();
+    }
+});
+
+</script>
+</body>
+</html>
